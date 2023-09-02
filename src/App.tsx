@@ -131,69 +131,82 @@ function App() {
           </div>
         )}
       </PlacesAutocomplete>
-      <div className="grid grid-cols-4 grid-rows-4 gap-4">
-        <section className="row-start-2 row-span-3 col-span-2 bg-white bg-opacity-5 px-4 rounded-lg min-h-[27rem]">
+      <div className="grid grid-cols-4 grid-rows-4 gap-4 max-w-[55rem] aspect-square ">
+        <section className="row-start-2 row-span-3 col-span-2 bg-white bg-opacity-5 px-4 rounded-lg min-h-[30rem] p-4">
           <p>8 day forecast</p>
           {weatherApiData?.daily.map((currentDay, index) => {
             let day = new Date(currentDay.dt * 1000);
 
             return (
-              <>
+              <p className="m-2">
                 <hr />
-                <ul className="grid grid-cols-8 grid-rows-1 gap-4  text-white">
-                  <li className="col-span-2 flex justify-center items-center">
+                <ul className="grid grid-cols-[20%_20%_50%] grid-rows-1 gap-4  text-white h-16 align-middle">
+                  <li className=" flex justify-center items-center">
                     {index === 0 ? "Today" : dayOfWeek[Number(day.getDay())]}{" "}
                   </li>
-                  <li className="col-span-1 flex justify-center items-center">
+                  <li className="flex justify-center items-center  h-14 w-14">
                     <img
-                      className="flex left-6 justify-center items-center"
+                      className="flex justify-center h-max w-max"
                       src={`https://openweathermap.org/img/wn/${currentDay.weather[0].icon}.png`}
                     />
                   </li>
-                  <li className="col-start-5 flex justify-center items-center">
-                    min:{Math.floor(currentDay.temp.min)}
-                  </li>
-                  <li className="col-start-6 flex justify-center items-center">
-                    max:{Math.floor(currentDay.temp.max)}
+                  <li className=" flex justify-between items-center ">
+                    <span>min:{Math.floor(currentDay.temp.min)}</span>
+                    <span>max:{Math.floor(currentDay.temp.max)}</span>
                   </li>
                 </ul>
-              </>
+              </p>
             );
           })}
         </section>
-        <section className="flex grid-rows-1  col-span-4 gap-4 overscroll-y-contain overflow-scroll">
-          {weatherApiData?.hourly.map((currentHour, index) => {
-            let hour = new Date(currentHour.dt * 1000);
-            if (index <= 24) {
-              return (
-                <span>
-                  {index === 0
-                    ? "Now"
-                    : hour.getHours() === 0
-                    ? 24
-                    : hour.getHours()}
-                  <img
-                    src={`https://openweathermap.org/img/wn/${currentHour.weather[0].icon}.png`}
-                  />
-                  {Math.floor(currentHour.temp)}°
-                </span>
-              );
-            }
-          })}
-        </section>
-        <section className="col-span-1 row-span-1">
-          <ul>
-            <li>UV-index</li>
-            <li>{weatherApiData?.current.uvi}</li>
+        <section className="flex grid-rows-1  col-span-4 gap-4 overscroll-y-contain overflow-scroll bg-white bg-opacity-5 rounded-lg align-middle">
+          <ul className="flex flex-row h-1/2 ">
+            {weatherApiData?.hourly.map((currentHour, index) => {
+              let hour = new Date(currentHour.dt * 1000);
+              if (index <= 24) {
+                return (
+                  <li className=" w-12">
+                    {index === 0
+                      ? "Now"
+                      : hour.getHours() === 0
+                      ? 24
+                      : hour.getHours()}
+                    <img
+                      src={`https://openweathermap.org/img/wn/${currentHour.weather[0].icon}.png`}
+                    />
+                    {Math.floor(currentHour.temp)}°
+                  </li>
+                );
+              }
+            })}
           </ul>
         </section>
-        <section className="col-span-1 row-span-1">
+        <section className="col-span-1 row-span-1  bg-white bg-opacity-5">
+          <ul className="">
+            <li>UV-index</li>
+            <li>{weatherApiData?.current.uvi}</li>
+            <li>
+              {weatherApiData?.current.uvi
+                ? weatherApiData?.current.uvi <= 2
+                  ? "Low"
+                  : weatherApiData?.current.uvi <= 5
+                  ? "Moderate"
+                  : weatherApiData?.current.uvi <= 7
+                  ? "High"
+                  : weatherApiData?.current.uvi <= 11
+                  ? "Very high"
+                  : "null"
+                : "null"}
+            </li>
+          </ul>
+        </section>
+        <section className="col-span-1 row-span-1  bg-white bg-opacity-5">
           <ul>
             <li>Sunrise</li>
             <li>{weatherApiData?.current.sunrise}</li>
           </ul>
         </section>
-        <section className="col-span-1 row-span-1">
+        <section className="col-span-1 row-span-1  bg-white bg-opacity-5">
           <ul>
             <li>Wind</li>
             <li>
@@ -203,13 +216,13 @@ function App() {
             </li>
           </ul>
         </section>
-        <section className="col-span-1 row-span-1">
+        <section className="col-span-1 row-span-1  bg-white bg-opacity-5">
           <ul>
             <li>Pressure</li>
             <li>{weatherApiData?.current.pressure} hPa</li>
           </ul>
         </section>
-        <section className="col-span-1 row-span-1">
+        <section className="col-span-1 row-span-1  bg-white bg-opacity-5">
           <ul>
             <li>Feels like</li>
             <li>
@@ -219,7 +232,7 @@ function App() {
             </li>
           </ul>
         </section>
-        <section className="col-span-1 row-span-1">
+        <section className="col-span-1 row-span-1  bg-white bg-opacity-5">
           <ul>
             <li>Humidity</li>
             <li>{weatherApiData?.current.humidity}</li>
