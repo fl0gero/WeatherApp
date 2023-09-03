@@ -1,65 +1,68 @@
 import { useEffect, useState } from "react";
 import "./App.css";
 import PlacesAutocomplete from "react-places-autocomplete";
+import { SunriseSunsetSection } from "./components/SunriseSunsetSection";
+import { BaseSection } from "./components/BaseSection";
 import {
   geocodeByAddress,
   geocodeByPlaceId,
   getLatLng,
 } from "react-places-autocomplete";
 
-function App() {
-  type WeatherApiData = {
-    current: {
-      feels_like: number;
-      humidity: number;
-      pressure: number;
-      sunrise: number;
-      sunset: number;
-      temp: number;
-      uvi: number;
-      visibility: number;
-      wind_speed: number;
-    };
-    daily: Array<{
-      dt: number;
-      sunrise: number;
-      sunset: number;
-      wind_speed: number;
-      temp: { min: number; max: number };
-      weather: Array<{
-        description: string;
-        icon: string;
-        id: number;
-        main: string;
-      }>;
-    }>;
-    hourly: Array<{
-      dt: number;
-      temp: number;
-      weather: Array<{
-        description: string;
-        icon: string;
-        id: number;
-        main: string;
-      }>;
-    }>;
-    lat: number;
-    lon: number;
-    minutely: Array<number>;
+type WeatherApiData = {
+  current: {
+    feels_like: number;
+    humidity: number;
+    pressure: number;
+    sunrise: number;
+    sunset: number;
+    temp: number;
+    uvi: number;
+    dt: number;
+    visibility: number;
+    wind_speed: number;
   };
+  daily: Array<{
+    dt: number;
+    sunrise: number;
+    sunset: number;
+    wind_speed: number;
+    temp: { min: number; max: number };
+    weather: Array<{
+      description: string;
+      icon: string;
+      id: number;
+      main: string;
+    }>;
+  }>;
+  hourly: Array<{
+    dt: number;
+    temp: number;
+    weather: Array<{
+      description: string;
+      icon: string;
+      id: number;
+      main: string;
+    }>;
+  }>;
+  lat: number;
+  lon: number;
+  minutely: Array<number>;
+};
 
-  const dayOfWeek: Array<string> = [
-    "Sun",
-    "Mon",
-    "Tue",
-    "Wed",
-    "Thu",
-    "Fri",
-    "Sat",
-  ];
+const dayOfWeek: Array<string> = [
+  "Sun",
+  "Mon",
+  "Tue",
+  "Wed",
+  "Thu",
+  "Fri",
+  "Sat",
+];
 
+function App() {
   const [weatherApiData, setWeatherApiData] = useState<WeatherApiData>();
-  const [adress, setAdress] = useState<string>();
+  const [address, setAddress] = useState<string>();
   const [coordinates, setCoordinates] = useState<{
     lat: number;
     lng: number;
@@ -69,7 +72,7 @@ function App() {
     const results = await geocodeByAddress(value);
     const ll = await getLatLng(results[0]);
     console.log(ll);
-    setAdress(value);
+    setAddress(value);
     setCoordinates(ll);
   };
 
@@ -89,24 +92,24 @@ function App() {
   console.log(weatherApiData);
 
   return (
-    <>
+    <div className="flex flex-col items-center text-white">
       <p>lat:{coordinates?.lat}</p>
       <p>lng:{coordinates?.lng}</p>
-      <p>Adress:{adress}</p>
+      <p>Address:{address}</p>
       <PlacesAutocomplete
-        value={adress}
-        onChange={setAdress}
+        value={address}
+        onChange={setAddress}
         onSelect={handleSelect}
       >
         {({ getInputProps, suggestions, getSuggestionItemProps, loading }) => (
-          <div className="flex flex-col fixed top-5 right-5">
+          <div className=" fixed right-5 top-5 flex flex-col">
             <input
               {...getInputProps({
                 placeholder: "Search Places ...",
                 className: "",
               })}
             />
-            <div className="flex flex-col absolute top-5">
+            <div className="absolute top-5 flex flex-col">
               {loading && <div>Loading...</div>}
               {suggestions.map((suggestion) => {
                 const className = suggestion.active
@@ -131,41 +134,43 @@ function App() {
           </div>
         )}
       </PlacesAutocomplete>
-      <div className="grid grid-cols-4 grid-rows-4 gap-4 max-w-[55rem] aspect-square ">
-        <section className="row-start-2 row-span-3 col-span-2 bg-white bg-opacity-5 px-4 rounded-lg min-h-[30rem] p-4">
-          <p>8 day forecast</p>
-          {weatherApiData?.daily.map((currentDay, index) => {
-            let day = new Date(currentDay.dt * 1000);
+      <div className="grid aspect-square max-w-[55rem] grid-cols-4 grid-rows-4 gap-4">
+        <section className="col-span-2 row-span-3 row-start-2 min-h-[30rem] rounded-lg bg-white bg-opacity-5 p-4 px-4">
+          <p className="opacity-50">8 day forecast</p>
+          <ul>
+            {weatherApiData?.daily.map((currentDay, index) => {
+              const day = new Date(currentDay.dt * 1000);
 
-            return (
-              <p className="m-2">
-                <hr />
-                <ul className="grid grid-cols-[20%_20%_50%] grid-rows-1 gap-4  text-white h-16 align-middle">
-                  <li className=" flex justify-center items-center">
-                    {index === 0 ? "Today" : dayOfWeek[Number(day.getDay())]}{" "}
-                  </li>
-                  <li className="flex justify-center items-center  h-14 w-14">
-                    <img
-                      className="flex justify-center h-max w-max"
-                      src={`https://openweathermap.org/img/wn/${currentDay.weather[0].icon}.png`}
-                    />
-                  </li>
-                  <li className=" flex justify-between items-center ">
-                    <span>min:{Math.floor(currentDay.temp.min)}</span>
-                    <span>max:{Math.floor(currentDay.temp.max)}</span>
-                  </li>
-                </ul>
-              </p>
-            );
-          })}
+              return (
+                <li className="m-2">
+                  <hr />
+                  <ul className="grid h-16 grid-cols-[20%_20%_50%] grid-rows-1  gap-4 align-middle ">
+                    <li className=" flex items-center justify-center">
+                      {index === 0 ? "Today" : dayOfWeek[Number(day.getDay())]}
+                    </li>
+                    <li className="flex h-14 w-14  items-center justify-center">
+                      <img
+                        className="flex h-max w-max justify-center"
+                        src={`https://openweathermap.org/img/wn/${currentDay.weather[0].icon}.png`}
+                      />
+                    </li>
+                    <li className=" flex items-center justify-between ">
+                      <span>min:{Math.floor(currentDay.temp.min)}</span>
+                      <span>max:{Math.floor(currentDay.temp.max)}</span>
+                    </li>
+                  </ul>
+                </li>
+              );
+            })}
+          </ul>
         </section>
-        <section className="flex grid-rows-1  col-span-4 gap-4 overscroll-y-contain overflow-scroll bg-white bg-opacity-5 rounded-lg align-middle">
-          <ul className="flex flex-row h-1/2 ">
+        <section className="col-span-4 flex  grid-rows-1  items-center gap-4 overflow-scroll overscroll-y-contain rounded-lg bg-white bg-opacity-5">
+          <ul className="flex h-1/2 flex-row">
             {weatherApiData?.hourly.map((currentHour, index) => {
-              let hour = new Date(currentHour.dt * 1000);
+              const hour = new Date(currentHour.dt * 1000);
               if (index <= 24) {
                 return (
-                  <li className=" w-12">
+                  <li className=" w-14">
                     {index === 0
                       ? "Now"
                       : hour.getHours() === 0
@@ -181,65 +186,54 @@ function App() {
             })}
           </ul>
         </section>
-        <section className="col-span-1 row-span-1  bg-white bg-opacity-5">
-          <ul className="">
-            <li>UV-index</li>
-            <li>{weatherApiData?.current.uvi}</li>
-            <li>
-              {weatherApiData?.current.uvi
-                ? weatherApiData?.current.uvi <= 2
-                  ? "Low"
-                  : weatherApiData?.current.uvi <= 5
-                  ? "Moderate"
-                  : weatherApiData?.current.uvi <= 7
-                  ? "High"
-                  : weatherApiData?.current.uvi <= 11
-                  ? "Very high"
-                  : "null"
-                : "null"}
-            </li>
-          </ul>
+        <section className="col-span-1 row-span-1 flex flex-col rounded-lg bg-white bg-opacity-5 p-3">
+          <h3 className="w-fit opacity-50">UV-index</h3>
+          <h1 className="mt-4 w-fit text-5xl">
+            {weatherApiData?.current.uvi
+              ? Math.round(weatherApiData.current.uvi)
+              : 0}
+          </h1>
+          <h2 className="w-fit text-xl">
+            {weatherApiData?.current.uvi === 0
+              ? weatherApiData.current.uvi <= 2
+                ? "Low"
+                : weatherApiData.current.uvi <= 5
+                ? "Moderate"
+                : weatherApiData.current.uvi <= 7
+                ? "High"
+                : weatherApiData.current.uvi <= 11
+                ? "Very high"
+                : null
+              : null}
+          </h2>
         </section>
-        <section className="col-span-1 row-span-1  bg-white bg-opacity-5">
-          <ul>
-            <li>Sunrise</li>
-            <li>{weatherApiData?.current.sunrise}</li>
-          </ul>
-        </section>
-        <section className="col-span-1 row-span-1  bg-white bg-opacity-5">
-          <ul>
-            <li>Wind</li>
-            <li>
-              {weatherApiData?.daily[0].wind_speed
-                ? Math.floor(weatherApiData.daily[0].wind_speed * 3.6)
-                : null}
-            </li>
-          </ul>
-        </section>
-        <section className="col-span-1 row-span-1  bg-white bg-opacity-5">
-          <ul>
-            <li>Pressure</li>
-            <li>{weatherApiData?.current.pressure} hPa</li>
-          </ul>
-        </section>
-        <section className="col-span-1 row-span-1  bg-white bg-opacity-5">
-          <ul>
-            <li>Feels like</li>
-            <li>
-              {weatherApiData?.current.feels_like
-                ? Math.floor(weatherApiData?.current.feels_like)
-                : null}
-            </li>
-          </ul>
-        </section>
-        <section className="col-span-1 row-span-1  bg-white bg-opacity-5">
-          <ul>
-            <li>Humidity</li>
-            <li>{weatherApiData?.current.humidity}</li>
-          </ul>
-        </section>
+        <SunriseSunsetSection
+          sunrise={weatherApiData?.current.sunrise}
+          sunset={weatherApiData?.current.sunset}
+          current={weatherApiData?.current.dt}
+        />
+        <BaseSection
+          title="Wind"
+          value={weatherApiData?.current.wind_speed}
+          description="km/h"
+        />
+        <BaseSection
+          title="Pressure"
+          value={weatherApiData?.current.pressure}
+          description="hPa"
+        />
+        <BaseSection
+          title="Feels like"
+          value={weatherApiData?.current.feels_like}
+          measurement="°"
+        />
+        <BaseSection
+          title="Humidity"
+          value={weatherApiData?.current.humidity}
+          measurement="%"
+        />
       </div>
-    </>
+    </div>
   );
 }
 
