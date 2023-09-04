@@ -48,6 +48,7 @@ type WeatherApiData = {
   lat: number;
   lon: number;
   minutely: Array<number>;
+  timezone_offset: number;
 };
 
 const dayOfWeek: Array<string> = [
@@ -58,6 +59,55 @@ const dayOfWeek: Array<string> = [
   "Thu",
   "Fri",
   "Sat",
+];
+
+const morningGradient = [
+  "bg-gradient-to-b",
+  "from-blue-300",
+  "from-10%",
+  "via-orange-200",
+  "via-80%",
+  "to-orange-400",
+  "to-100%",
+  "transition",
+  "ease-in-out",
+  "delay-150",
+];
+const dayGradient = [
+  "bg-gradient-to-b",
+  "from-sky-500",
+  "from-10%",
+  "via-sky-300",
+  "via-80%",
+  "to-blue-200",
+  "to-100%",
+  "transition",
+  "ease-in-out",
+  "delay-150",
+];
+const eveningGradient = [
+  "bg-gradient-to-b",
+  "from-violet-400",
+  "from-10%",
+  "via-orange-300",
+  "via-80%",
+  "to-orange-600",
+  "to-100%",
+  "transition",
+  "ease-in-out",
+  "delay-150",
+];
+const nightGradient = [
+  "bg-gradient-to-b",
+  "from-slate-900",
+  "from-10%",
+  "via-blue-900",
+  "via-80%",
+  "to-indigo-800",
+  "to-100%",
+  "transition",
+  "ease-in-out",
+  "delay-150",
 ];
 
 function App() {
@@ -78,7 +128,7 @@ function App() {
 
   // API KEY AND URL
   const apiKey = "f3a81f86e561414fe94d1d0b0332165f";
-  const apiUrl = ` https://api.openweathermap.org/data/3.0/onecall?lat=${coordinates?.lat}&lon=${coordinates?.lng}&exclude=weekly&units=metric&appid=${apiKey}`;
+  const apiUrl = `https://api.openweathermap.org/data/3.0/onecall?precipitation&lat=${coordinates?.lat}&lon=${coordinates?.lng}&exclude=weekly&units=metric&appid=${apiKey}`;
 
   useEffect(() => {
     if (coordinates) {
@@ -91,6 +141,28 @@ function App() {
   }, [apiUrl]);
   console.log(weatherApiData);
 
+  if (weatherApiData?.current.dt) {
+    const dt = new Date(
+      (weatherApiData?.current.dt + weatherApiData.timezone_offset) * 1000,
+    );
+    const currentHour = dt.getHours();
+    console.log(currentHour);
+
+    if (currentHour <= 5) {
+      document.body.className = "";
+      document.body.classList.add(...nightGradient);
+    } else if (currentHour <= 12) {
+      document.body.className = "";
+      document.body.classList.add(...morningGradient);
+    } else if (currentHour <= 17) {
+      document.body.className = "";
+      document.body.classList.add(...dayGradient);
+    } else if (currentHour <= 21) {
+      document.body.className = "";
+      document.body.classList.add(...eveningGradient);
+    }
+  }
+
   return (
     <div className="flex flex-col items-center text-white">
       <p>lat:{coordinates?.lat}</p>
@@ -102,7 +174,7 @@ function App() {
         onSelect={handleSelect}
       >
         {({ getInputProps, suggestions, getSuggestionItemProps, loading }) => (
-          <div className=" fixed right-5 top-5 flex flex-col">
+          <div className=" fixed right-5 top-5 flex flex-col text-black">
             <input
               {...getInputProps({
                 placeholder: "Search Places ...",
@@ -135,11 +207,13 @@ function App() {
         )}
       </PlacesAutocomplete>
       <div className="grid aspect-square max-w-[55rem] grid-cols-4 grid-rows-4 gap-4">
-        <section className="col-span-2 row-span-3 row-start-2 min-h-[30rem] rounded-lg bg-white bg-opacity-5 p-4 px-4">
+        <section className="col-span-2 row-span-3 row-start-2 min-h-[30rem] rounded-lg bg-white bg-opacity-10 p-4 px-4">
           <p className="opacity-50">8 day forecast</p>
           <ul>
             {weatherApiData?.daily.map((currentDay, index) => {
-              const day = new Date(currentDay.dt * 1000);
+              const day = new Date(
+                (currentDay.dt + weatherApiData.timezone_offset) * 1000,
+              );
 
               return (
                 <li className="m-2">
@@ -164,10 +238,12 @@ function App() {
             })}
           </ul>
         </section>
-        <section className="col-span-4 flex  grid-rows-1  items-center gap-4 overflow-scroll overscroll-y-contain rounded-lg bg-white bg-opacity-5">
+        <section className="col-span-4 flex  grid-rows-1  items-center gap-4 overflow-scroll overscroll-y-contain rounded-lg bg-white bg-opacity-10">
           <ul className="flex h-1/2 flex-row">
             {weatherApiData?.hourly.map((currentHour, index) => {
-              const hour = new Date(currentHour.dt * 1000);
+              const hour = new Date(
+                (currentHour.dt + weatherApiData.timezone_offset) * 1000,
+              );
               if (index <= 24) {
                 return (
                   <li className=" w-14">
@@ -186,15 +262,16 @@ function App() {
             })}
           </ul>
         </section>
-        <section className="col-span-1 row-span-1 flex flex-col rounded-lg bg-white bg-opacity-5 p-3">
-          <h3 className="w-fit opacity-50">UV-index</h3>
-          <h1 className="mt-4 w-fit text-5xl">
-            {weatherApiData?.current.uvi
+
+        <BaseSection
+          title="UV-index"
+          value={
+            weatherApiData?.current.uvi
               ? Math.round(weatherApiData.current.uvi)
-              : 0}
-          </h1>
-          <h2 className="w-fit text-xl">
-            {weatherApiData?.current.uvi === 0
+              : 0
+          }
+          description={
+            weatherApiData?.current.uvi === 0
               ? weatherApiData.current.uvi <= 2
                 ? "Low"
                 : weatherApiData.current.uvi <= 5
@@ -203,10 +280,10 @@ function App() {
                 ? "High"
                 : weatherApiData.current.uvi <= 11
                 ? "Very high"
-                : null
-              : null}
-          </h2>
-        </section>
+                : ""
+              : ""
+          }
+        />
         <SunriseSunsetSection
           sunrise={weatherApiData?.current.sunrise}
           sunset={weatherApiData?.current.sunset}

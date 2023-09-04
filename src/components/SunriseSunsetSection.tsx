@@ -14,7 +14,7 @@ export const SunriseSunsetSection = ({
   const sunriseTime = new Date(Number(sunrise) * 1000);
   const sunsetTime = new Date(Number(sunset) * 1000);
   const currentTime = new Date(Number(current) * 1000);
-  const isSunset = currentTime > sunriseTime;
+  const isSunset = currentTime < sunriseTime;
   return (
     <BaseSection
       title={isSunset ? "Sunset" : "Sunrise"}
@@ -23,11 +23,12 @@ export const SunriseSunsetSection = ({
           ? `${sunsetTime.getHours()}:${sunsetTime.getMinutes()}`
           : `${sunriseTime.getHours()}:${sunriseTime.getMinutes()}`
       }
-      description={
-        isSunset
+    >
+      <h2 className="absolute bottom-4 left-4">
+        {isSunset
           ? `Sunrise: ${sunriseTime.getHours()}:${sunriseTime.getMinutes()}`
-          : `Sunset: ${sunsetTime.getHours()}:${sunsetTime.getMinutes()}`
-      }
-    ></BaseSection>
+          : `Sunset: ${sunsetTime.getHours()}:${sunsetTime.getMinutes()}`}
+      </h2>
+    </BaseSection>
   );
 };
