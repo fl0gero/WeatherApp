@@ -1,9 +1,9 @@
 import { BaseSection } from "./BaseSection";
 
 type SunriseSunsetSectionProps = {
-  sunrise?: number;
-  sunset?: number;
-  current?: number;
+  sunrise?: Date;
+  sunset?: Date;
+  current?: Date;
 };
 
 export const SunriseSunsetSection = ({
@@ -11,10 +11,10 @@ export const SunriseSunsetSection = ({
   sunset,
   current,
 }: SunriseSunsetSectionProps) => {
-  const sunriseTime = new Date(Number(sunrise) * 1000);
-  const sunsetTime = new Date(Number(sunset) * 1000);
-  const currentTime = new Date(Number(current) * 1000);
-  const isSunset = currentTime < sunriseTime;
+  const sunriseTime = sunrise ? sunrise : new Date();
+  const sunsetTime = sunset ? sunset : new Date();
+  const currentTime = current ? current : new Date();
+  const isSunset = currentTime.getHours() < sunsetTime.getHours();
   return (
     <BaseSection
       title={isSunset ? "Sunset" : "Sunrise"}

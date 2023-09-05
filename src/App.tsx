@@ -3,6 +3,7 @@ import "./App.css";
 import PlacesAutocomplete from "react-places-autocomplete";
 import { SunriseSunsetSection } from "./components/SunriseSunsetSection";
 import { BaseSection } from "./components/BaseSection";
+import { getDateWithOffset } from "./utils/utils";
 import {
   geocodeByAddress,
   geocodeByPlaceId,
@@ -118,10 +119,24 @@ function App() {
     lng: number;
   } | null>(null);
 
+  const uviStatus = () => {
+    if (weatherApiData?.current.uvi) {
+      const uvi = Math.round(weatherApiData?.current.uvi);
+      if (uvi <= 2) {
+        return "Low";
+      } else if (uvi <= 5) {
+        return "Moderate";
+      } else if (uvi <= 7) {
+        return "High";
+      } else if (uvi <= 11) {
+        return "Very high";
+      }
+    }
+  };
+
   const handleSelect = async (value: string) => {
     const results = await geocodeByAddress(value);
     const ll = await getLatLng(results[0]);
-    console.log(ll);
     setAddress(value);
     setCoordinates(ll);
   };
@@ -142,11 +157,11 @@ function App() {
   console.log(weatherApiData);
 
   if (weatherApiData?.current.dt) {
-    const dt = new Date(
-      (weatherApiData?.current.dt + weatherApiData.timezone_offset) * 1000,
+    const dt = getDateWithOffset(
+      weatherApiData.current.dt,
+      weatherApiData.timezone_offset,
     );
     const currentHour = dt.getHours();
-    console.log(currentHour);
 
     if (currentHour <= 5) {
       document.body.className = "";
@@ -211,8 +226,9 @@ function App() {
           <p className="opacity-50">8 day forecast</p>
           <ul>
             {weatherApiData?.daily.map((currentDay, index) => {
-              const day = new Date(
-                (currentDay.dt + weatherApiData.timezone_offset) * 1000,
+              const day = getDateWithOffset(
+                currentDay.dt,
+                weatherApiData.timezone_offset,
               );
 
               return (
@@ -241,9 +257,14 @@ function App() {
         <section className="col-span-4 flex  grid-rows-1  items-center gap-4 overflow-scroll overscroll-y-contain rounded-lg bg-white bg-opacity-10">
           <ul className="flex h-1/2 flex-row">
             {weatherApiData?.hourly.map((currentHour, index) => {
-              const hour = new Date(
-                (currentHour.dt + weatherApiData.timezone_offset) * 1000,
+              const hour = getDateWithOffset(
+                currentHour.dt,
+                weatherApiData.timezone_offset,
               );
+              // console.log(currentHour);
+              // console.log(weatherApiData.timezone_offset);
+              console.log(hour.toISOString());
+
               if (index <= 24) {
                 return (
                   <li className=" w-14">
@@ -266,28 +287,29 @@ function App() {
         <BaseSection
           title="UV-index"
           value={
-            weatherApiData?.current.uvi
-              ? Math.round(weatherApiData.current.uvi)
-              : 0
+            weatherApiData?.current.uvi === undefined
+              ? weatherApiData?.current.uvi
+              : "0"
           }
-          description={
-            weatherApiData?.current.uvi === 0
-              ? weatherApiData.current.uvi <= 2
-                ? "Low"
-                : weatherApiData.current.uvi <= 5
-                ? "Moderate"
-                : weatherApiData.current.uvi <= 7
-                ? "High"
-                : weatherApiData.current.uvi <= 11
-                ? "Very high"
-                : ""
-              : ""
-          }
+          description={uviStatus()}
         />
         <SunriseSunsetSection
-          sunrise={weatherApiData?.current.sunrise}
-          sunset={weatherApiData?.current.sunset}
-          current={weatherApiData?.current.dt}
+          sunrise={getDateWithOffset(
+            weatherApiData?.current.sunrise!,
+            weatherApiData?.timezone_offset!,
+          )}
+          sunset={getDateWithOffset(
+            weatherApiData?.current.sunset!,
+            weatherApiData?.timezone_offset!,
+          )}
+          current={
+            weatherApiData?.current.dt
+              ? getDateWithOffset(
+                  weatherApiData?.current.dt,
+                  weatherApiData?.timezone_offset,
+                )
+              : new Date()
+          }
         />
         <BaseSection
           title="Wind"
