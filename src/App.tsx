@@ -4,13 +4,15 @@ import PlacesAutocomplete from "react-places-autocomplete";
 import { SunriseSunsetSection } from "./components/SunriseSunsetSection";
 import { BaseSection } from "./components/BaseSection";
 import { getDateWithOffset } from "./utils/utils";
+import { WeekSection } from "./components/WeekSection";
+import { HourlySection } from "./components/HourlySection";
 import {
   geocodeByAddress,
   geocodeByPlaceId,
   getLatLng,
 } from "react-places-autocomplete";
 
-type WeatherApiData = {
+export type WeatherApiData = {
   current: {
     feels_like: number;
     humidity: number;
@@ -22,6 +24,10 @@ type WeatherApiData = {
     dt: number;
     visibility: number;
     wind_speed: number;
+    weather: Array<{
+      description: string;
+      main: string;
+    }>;
   };
   daily: Array<{
     dt: number;
@@ -51,16 +57,6 @@ type WeatherApiData = {
   minutely: Array<number>;
   timezone_offset: number;
 };
-
-const dayOfWeek: Array<string> = [
-  "Sun",
-  "Mon",
-  "Tue",
-  "Wed",
-  "Thu",
-  "Fri",
-  "Sat",
-];
 
 const morningGradient = [
   "bg-gradient-to-b",
@@ -132,6 +128,7 @@ function App() {
         return "Very high";
       }
     }
+    return "Low";
   };
 
   const handleSelect = async (value: string) => {
@@ -183,6 +180,17 @@ function App() {
       <p>lat:{coordinates?.lat}</p>
       <p>lng:{coordinates?.lng}</p>
       <p>Address:{address}</p>
+      <p>{weatherApiData?.current.weather[0].main}</p>
+      <ul className="flex w-1/12 justify-between">
+        <li>H:{Math.round(Number(weatherApiData?.daily[0].temp.max))}</li>
+        <li>
+          L:
+          {weatherApiData?.daily[0].temp.min
+            ? Math.round(weatherApiData?.daily[0].temp.min)
+            : "N/A"}
+        </li>
+      </ul>
+
       <PlacesAutocomplete
         value={address}
         onChange={setAddress}
@@ -222,73 +230,20 @@ function App() {
         )}
       </PlacesAutocomplete>
       <div className="grid aspect-square max-w-[55rem] grid-cols-4 grid-rows-4 gap-4">
-        <section className="col-span-2 row-span-3 row-start-2 min-h-[30rem] rounded-lg bg-white bg-opacity-10 p-4 px-4">
-          <p className="opacity-50">8 day forecast</p>
-          <ul>
-            {weatherApiData?.daily.map((currentDay, index) => {
-              const day = getDateWithOffset(
-                currentDay.dt,
-                weatherApiData.timezone_offset,
-              );
-
-              return (
-                <li className="m-2">
-                  <hr />
-                  <ul className="grid h-16 grid-cols-[20%_20%_50%] grid-rows-1  gap-4 align-middle ">
-                    <li className=" flex items-center justify-center">
-                      {index === 0 ? "Today" : dayOfWeek[Number(day.getDay())]}
-                    </li>
-                    <li className="flex h-14 w-14  items-center justify-center">
-                      <img
-                        className="flex h-max w-max justify-center"
-                        src={`https://openweathermap.org/img/wn/${currentDay.weather[0].icon}.png`}
-                      />
-                    </li>
-                    <li className=" flex items-center justify-between ">
-                      <span>min:{Math.floor(currentDay.temp.min)}</span>
-                      <span>max:{Math.floor(currentDay.temp.max)}</span>
-                    </li>
-                  </ul>
-                </li>
-              );
-            })}
-          </ul>
-        </section>
-        <section className="col-span-4 flex  grid-rows-1  items-center gap-4 overflow-scroll overscroll-y-contain rounded-lg bg-white bg-opacity-10">
-          <ul className="flex h-1/2 flex-row">
-            {weatherApiData?.hourly.map((currentHour, index) => {
-              const hour = getDateWithOffset(
-                currentHour.dt,
-                weatherApiData.timezone_offset,
-              );
-              // console.log(currentHour);
-              // console.log(weatherApiData.timezone_offset);
-              console.log(hour.toISOString());
-
-              if (index <= 24) {
-                return (
-                  <li className=" w-14">
-                    {index === 0
-                      ? "Now"
-                      : hour.getHours() === 0
-                      ? 24
-                      : hour.getHours()}
-                    <img
-                      src={`https://openweathermap.org/img/wn/${currentHour.weather[0].icon}.png`}
-                    />
-                    {Math.floor(currentHour.temp)}°
-                  </li>
-                );
-              }
-            })}
-          </ul>
-        </section>
+        <WeekSection
+          title="8 day forecast"
+          weatherData={weatherApiData}
+          measurement="°"
+        />
+        <HourlySection weatherData={weatherApiData} measurement="°" />
 
         <BaseSection
           title="UV-index"
           value={
-            weatherApiData?.current.uvi === undefined
-              ? weatherApiData?.current.uvi
+            weatherApiData?.current.uvi
+              ? weatherApiData?.current.uvi > 0
+                ? weatherApiData?.current.uvi
+                : "0"
               : "0"
           }
           description={uviStatus()}

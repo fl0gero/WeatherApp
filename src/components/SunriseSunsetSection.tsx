@@ -26,8 +26,16 @@ export const SunriseSunsetSection = ({
     >
       <h2 className="absolute bottom-4 left-4">
         {isSunset
-          ? `Sunrise: ${sunriseTime.getHours()}:${sunriseTime.getMinutes()}`
-          : `Sunset: ${sunsetTime.getHours()}:${sunsetTime.getMinutes()}`}
+          ? `Sunrise: ${sunriseTime.getHours()}:${
+              String(sunriseTime.getMinutes()).length < 2
+                ? `0${sunriseTime.getMinutes()}`
+                : sunriseTime.getMinutes()
+            }`
+          : `Sunset: ${sunsetTime.getHours()}:${
+              String(sunsetTime.getMinutes()).length < 2
+                ? `0${sunsetTime.getMinutes()}`
+                : sunsetTime.getMinutes()
+            }`}
       </h2>
     </BaseSection>
   );
