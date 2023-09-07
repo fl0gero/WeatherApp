@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import "./App.css";
-import PlacesAutocomplete from "react-places-autocomplete";
 import { SunriseSunsetSection } from "./components/SunriseSunsetSection";
 import { BaseSection } from "./components/BaseSection";
 import { getDateWithOffset } from "./utils/utils";
 import { WeekSection } from "./components/WeekSection";
 import { HourlySection } from "./components/HourlySection";
+import { AutoComplete } from "./components/Autocomplete";
 import {
   geocodeByAddress,
   geocodeByPlaceId,
@@ -66,9 +66,6 @@ const morningGradient = [
   "via-80%",
   "to-orange-400",
   "to-100%",
-  "transition",
-  "ease-in-out",
-  "delay-150",
 ];
 const dayGradient = [
   "bg-gradient-to-b",
@@ -78,9 +75,6 @@ const dayGradient = [
   "via-80%",
   "to-blue-200",
   "to-100%",
-  "transition",
-  "ease-in-out",
-  "delay-150",
 ];
 const eveningGradient = [
   "bg-gradient-to-b",
@@ -90,9 +84,6 @@ const eveningGradient = [
   "via-80%",
   "to-orange-600",
   "to-100%",
-  "transition",
-  "ease-in-out",
-  "delay-150",
 ];
 const nightGradient = [
   "bg-gradient-to-b",
@@ -102,14 +93,11 @@ const nightGradient = [
   "via-80%",
   "to-indigo-800",
   "to-100%",
-  "transition",
-  "ease-in-out",
-  "delay-150",
 ];
 
 function App() {
   const [weatherApiData, setWeatherApiData] = useState<WeatherApiData>();
-  const [address, setAddress] = useState<string>();
+  const [address, setAddress] = useState<string>("");
   const [coordinates, setCoordinates] = useState<{
     lat: number;
     lng: number;
@@ -117,7 +105,7 @@ function App() {
 
   const uviStatus = () => {
     if (weatherApiData?.current.uvi) {
-      const uvi = Math.round(weatherApiData?.current.uvi);
+      const uvi = Math.round(weatherApiData.current.uvi);
       if (uvi <= 2) {
         return "Low";
       } else if (uvi <= 5) {
@@ -160,75 +148,50 @@ function App() {
     );
     const currentHour = dt.getHours();
 
-    if (currentHour <= 5) {
-      document.body.className = "";
-      document.body.classList.add(...nightGradient);
+    if (currentHour <= 5 || currentHour > 21) {
+      document.body.className = nightGradient.join(" ");
     } else if (currentHour <= 12) {
-      document.body.className = "";
-      document.body.classList.add(...morningGradient);
+      document.body.className = morningGradient.join(" ");
     } else if (currentHour <= 17) {
-      document.body.className = "";
-      document.body.classList.add(...dayGradient);
+      document.body.className = dayGradient.join(" ");
     } else if (currentHour <= 21) {
-      document.body.className = "";
-      document.body.classList.add(...eveningGradient);
+      document.body.className = eveningGradient.join(" ");
     }
   }
-
-  return (
-    <div className="flex flex-col items-center text-white">
-      <p>lat:{coordinates?.lat}</p>
-      <p>lng:{coordinates?.lng}</p>
-      <p>Address:{address}</p>
-      <p>{weatherApiData?.current.weather[0].main}</p>
-      <ul className="flex w-1/12 justify-between">
-        <li>H:{Math.round(Number(weatherApiData?.daily[0].temp.max))}</li>
-        <li>
-          L:
-          {weatherApiData?.daily[0].temp.min
-            ? Math.round(weatherApiData?.daily[0].temp.min)
-            : "N/A"}
-        </li>
-      </ul>
-
-      <PlacesAutocomplete
+  if (!weatherApiData) {
+    return (
+      <AutoComplete
         value={address}
         onChange={setAddress}
         onSelect={handleSelect}
-      >
-        {({ getInputProps, suggestions, getSuggestionItemProps, loading }) => (
-          <div className=" fixed right-5 top-5 flex flex-col text-black">
-            <input
-              {...getInputProps({
-                placeholder: "Search Places ...",
-                className: "",
-              })}
-            />
-            <div className="absolute top-5 flex flex-col">
-              {loading && <div>Loading...</div>}
-              {suggestions.map((suggestion) => {
-                const className = suggestion.active
-                  ? "suggestion-item--active"
-                  : "suggestion-item";
-                // inline style for demonstration purpose
-                const style = suggestion.active
-                  ? { backgroundColor: "#fafafa", cursor: "pointer" }
-                  : { backgroundColor: "#ffffff", cursor: "pointer" };
-                return (
-                  <div
-                    {...getSuggestionItemProps(suggestion, {
-                      className,
-                      style,
-                    })}
-                  >
-                    <span>{suggestion.description}</span>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
-      </PlacesAutocomplete>
+      />
+    );
+  }
+  return (
+    <div className="flex flex-col items-center text-white">
+      {/* <p>lat:{coordinates?.lat}</p>
+      <p>lng:{coordinates?.lng}</p> */}
+      <p>Address:{address}</p>
+      <p>{weatherApiData.current.weather[0].main}</p>
+      <ul className="flex w-1/12 justify-between">
+        <li>
+          H:
+          {weatherApiData.daily[0].temp.max
+            ? Math.round(weatherApiData.daily[0].temp.max)
+            : "N/A"}
+        </li>
+        <li>
+          L:
+          {weatherApiData.daily[0].temp.min
+            ? Math.round(weatherApiData.daily[0].temp.min)
+            : "N/A"}
+        </li>
+      </ul>
+      <AutoComplete
+        value={address}
+        onChange={setAddress}
+        onSelect={handleSelect}
+      />
       <div className="grid aspect-square max-w-[55rem] grid-cols-4 grid-rows-4 gap-4">
         <WeekSection
           title="8 day forecast"
@@ -239,51 +202,41 @@ function App() {
 
         <BaseSection
           title="UV-index"
-          value={
-            weatherApiData?.current.uvi
-              ? weatherApiData?.current.uvi > 0
-                ? weatherApiData?.current.uvi
-                : "0"
-              : "0"
-          }
+          value={weatherApiData.current.uvi}
           description={uviStatus()}
         />
         <SunriseSunsetSection
           sunrise={getDateWithOffset(
-            weatherApiData?.current.sunrise!,
-            weatherApiData?.timezone_offset!,
+            weatherApiData.current.sunrise,
+            weatherApiData.timezone_offset,
           )}
           sunset={getDateWithOffset(
-            weatherApiData?.current.sunset!,
-            weatherApiData?.timezone_offset!,
+            weatherApiData.current.sunrise,
+            weatherApiData.timezone_offset,
           )}
-          current={
-            weatherApiData?.current.dt
-              ? getDateWithOffset(
-                  weatherApiData?.current.dt,
-                  weatherApiData?.timezone_offset,
-                )
-              : new Date()
-          }
+          current={getDateWithOffset(
+            weatherApiData.current.dt,
+            weatherApiData.timezone_offset,
+          )}
         />
         <BaseSection
           title="Wind"
-          value={weatherApiData?.current.wind_speed}
+          value={weatherApiData.current.wind_speed}
           description="km/h"
         />
         <BaseSection
           title="Pressure"
-          value={weatherApiData?.current.pressure}
+          value={weatherApiData.current.pressure}
           description="hPa"
         />
         <BaseSection
           title="Feels like"
-          value={weatherApiData?.current.feels_like}
+          value={weatherApiData.current.feels_like}
           measurement="°"
         />
         <BaseSection
           title="Humidity"
-          value={weatherApiData?.current.humidity}
+          value={weatherApiData.current.humidity}
           measurement="%"
         />
       </div>
