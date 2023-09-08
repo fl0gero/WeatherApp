@@ -160,33 +160,42 @@ function App() {
   }
   if (!weatherApiData) {
     return (
-      <AutoComplete
-        value={address}
-        onChange={setAddress}
-        onSelect={handleSelect}
-      />
+      <>
+        <AutoComplete
+          value={address}
+          onChange={setAddress}
+          onSelect={handleSelect}
+        />
+        <main className="grid  h-max w-max place-items-center">
+          <p className="absolute left-1/2 top-1/2 translate-x-[-50%] translate-y-[-50%] rounded-lg bg-white bg-opacity-10 p-4 text-white">
+            There is no available data.
+            <br /> Pick a city to display all weather information about it.
+          </p>
+        </main>
+      </>
     );
   }
   return (
     <div className="flex flex-col items-center text-white">
-      {/* <p>lat:{coordinates?.lat}</p>
-      <p>lng:{coordinates?.lng}</p> */}
-      <p>Address:{address}</p>
-      <p>{weatherApiData.current.weather[0].main}</p>
-      <ul className="flex w-1/12 justify-between">
-        <li>
-          H:
-          {weatherApiData.daily[0].temp.max
-            ? Math.round(weatherApiData.daily[0].temp.max)
-            : "N/A"}
-        </li>
-        <li>
-          L:
-          {weatherApiData.daily[0].temp.min
-            ? Math.round(weatherApiData.daily[0].temp.min)
-            : "N/A"}
-        </li>
-      </ul>
+      <article className="m-5">
+        <p className="text-xl">{address}</p>
+        <p className="text-5xl">{Math.round(weatherApiData.current.temp)}°</p>
+        <p>{weatherApiData.current.weather[0].main}</p>
+        <ul className="flex  justify-around">
+          <li>
+            H:
+            {weatherApiData.daily[0].temp.max
+              ? Math.round(weatherApiData.daily[0].temp.max)
+              : "N/A"}
+          </li>
+          <li>
+            L:
+            {weatherApiData.daily[0].temp.min
+              ? Math.round(weatherApiData.daily[0].temp.min)
+              : "N/A"}
+          </li>
+        </ul>
+      </article>
       <AutoComplete
         value={address}
         onChange={setAddress}
