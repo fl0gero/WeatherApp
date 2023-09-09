@@ -6,6 +6,7 @@ import { getDateWithOffset } from "./utils/utils";
 import { WeekSection } from "./components/WeekSection";
 import { HourlySection } from "./components/HourlySection";
 import { AutoComplete } from "./components/Autocomplete";
+import { HeaderSection } from "./components/HeaderSection";
 import {
   geocodeByAddress,
   geocodeByPlaceId,
@@ -177,25 +178,7 @@ function App() {
   }
   return (
     <div className="flex flex-col items-center text-white">
-      <article className="m-5">
-        <p className="text-xl">{address}</p>
-        <p className="text-5xl">{Math.round(weatherApiData.current.temp)}°</p>
-        <p>{weatherApiData.current.weather[0].main}</p>
-        <ul className="flex  justify-around">
-          <li>
-            H:
-            {weatherApiData.daily[0].temp.max
-              ? Math.round(weatherApiData.daily[0].temp.max)
-              : "N/A"}
-          </li>
-          <li>
-            L:
-            {weatherApiData.daily[0].temp.min
-              ? Math.round(weatherApiData.daily[0].temp.min)
-              : "N/A"}
-          </li>
-        </ul>
-      </article>
+      <HeaderSection address={address} weatherApiData={weatherApiData} />
       <AutoComplete
         value={address}
         onChange={setAddress}
