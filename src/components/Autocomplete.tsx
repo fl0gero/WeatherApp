@@ -16,19 +16,24 @@ export const AutoComplete = ({
           <input
             {...getInputProps({
               placeholder: "Search Places ...",
-              className: "",
+              className: "rounded p-2 focus:outline-none",
             })}
           />
-          <div className="absolute top-5 flex flex-col">
-            {loading && <div>Loading...</div>}
+          <div className="absolute top-12 flex flex-col ">
+            {loading && (
+              <div className="rounded bg-slate-300 p-2">Loading...</div>
+            )}
             {suggestions.map((suggestion) => {
               const className = suggestion.active
                 ? "suggestion-item--active"
                 : "suggestion-item";
               // inline style for demonstration purpose
               const style = suggestion.active
-                ? { backgroundColor: "#fafafa", cursor: "pointer" }
-                : { backgroundColor: "#ffffff", cursor: "pointer" };
+                ? {
+                    backgroundColor: "#808080",
+                    cursor: "pointer",
+                  }
+                : { backgroundColor: "#ffff", cursor: "pointer" };
               return (
                 <div
                   {...getSuggestionItemProps(suggestion, {
