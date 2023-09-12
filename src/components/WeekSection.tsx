@@ -24,7 +24,7 @@ export const WeekSection = ({
 }: WeekSectionProps) => {
   if (weatherData)
     return (
-      <section className="col-span-2 row-span-3 row-start-2 min-h-[30rem] rounded-lg bg-white bg-opacity-10 p-4 px-4">
+      <section className="row-span-3 row-start-2 min-h-[30rem] rounded-lg bg-white bg-opacity-10 p-4 px-4 lg:col-span-2">
         <p className="opacity-50">{title}</p>
         <ul>
           {weatherData.daily.map((currentDay, index) => {

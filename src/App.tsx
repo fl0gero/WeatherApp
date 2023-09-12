@@ -184,7 +184,7 @@ function App() {
         onChange={setAddress}
         onSelect={handleSelect}
       />
-      <div className="grid aspect-square max-w-[55rem] grid-cols-4 grid-rows-4 gap-4">
+      <div className="grid max-w-[55rem] grid-cols-2 gap-4 lg:aspect-square lg:grid-cols-4 lg:grid-rows-4">
         <WeekSection
           title="8 day forecast"
           weatherData={weatherApiData}
