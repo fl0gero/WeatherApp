@@ -128,7 +128,7 @@ function App() {
   };
 
   // API KEY AND URL
-  const apiKey = "f3a81f86e561414fe94d1d0b0332165f";
+  const apiKey = import.meta.env.VITE_OPENWEATHER_KEY;
   const apiUrl = `https://api.openweathermap.org/data/3.0/onecall?precipitation&lat=${coordinates?.lat}&lon=${coordinates?.lng}&exclude=weekly&units=metric&appid=${apiKey}`;
 
   useEffect(() => {
